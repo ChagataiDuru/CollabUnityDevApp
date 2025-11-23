@@ -9,6 +9,9 @@ using UnityDevHub.API.Models.DevOps;
 
 namespace UnityDevHub.API.Services
 {
+    /// <summary>
+    /// Implementation of the IVcsService interface.
+    /// </summary>
     public class VcsService : IVcsService
     {
         private readonly ApplicationDbContext _context;
@@ -20,6 +23,7 @@ namespace UnityDevHub.API.Services
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public async Task<RepositoryDto> AddRepositoryAsync(Guid projectId, AddRepositoryDto dto)
         {
             var project = await _context.Projects.FindAsync(projectId);
@@ -49,6 +53,7 @@ namespace UnityDevHub.API.Services
             };
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<RepositoryDto>> GetRepositoriesAsync(Guid projectId)
         {
             return await _context.Repositories
@@ -64,6 +69,7 @@ namespace UnityDevHub.API.Services
                 .ToListAsync();
         }
 
+        /// <inheritdoc />
         public async Task ProcessGitHubWebhookAsync(string payload, string signature)
         {
             using var document = JsonDocument.Parse(payload);

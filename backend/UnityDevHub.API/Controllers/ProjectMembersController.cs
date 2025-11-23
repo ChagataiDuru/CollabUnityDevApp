@@ -14,6 +14,9 @@ namespace UnityDevHub.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/projects")]
+/// <summary>
+/// Controller for managing project members and their roles.
+/// </summary>
 public class ProjectMembersController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -35,6 +38,11 @@ public class ProjectMembersController : ControllerBase
     }
 
     // GET: api/projects/{projectId}/members
+    /// <summary>
+    /// Retrieves all members of a specific project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <returns>A list of project members.</returns>
     [HttpGet("{projectId}/members")]
     public async Task<ActionResult<List<ProjectMemberDto>>> GetProjectMembers(Guid projectId)
     {
@@ -66,6 +74,11 @@ public class ProjectMembersController : ControllerBase
     }
 
     // GET: api/projects/search-users?q={query}
+    /// <summary>
+    /// Searches for users by username or display name.
+    /// </summary>
+    /// <param name="q">The search query string.</param>
+    /// <returns>A list of users matching the query.</returns>
     [HttpGet("search-users")]
     public async Task<ActionResult<List<UserDto>>> SearchUsers([FromQuery] string q)
     {
@@ -90,6 +103,12 @@ public class ProjectMembersController : ControllerBase
     }
 
     // POST: api/projects/{projectId}/members
+    /// <summary>
+    /// Adds a new member to a project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <param name="dto">The member addition data.</param>
+    /// <returns>The added member details.</returns>
     [HttpPost("{projectId}/members")]
     public async Task<ActionResult<ProjectMemberDto>> AddMember(Guid projectId, [FromBody] AddMemberDto dto)
     {
@@ -149,6 +168,12 @@ public class ProjectMembersController : ControllerBase
     }
 
     // DELETE: api/projects/{projectId}/members/{userId}
+    /// <summary>
+    /// Removes a member from a project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <param name="memberId">The unique identifier of the user to remove.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("{projectId}/members/{memberId}")]
     public async Task<ActionResult> RemoveMember(Guid projectId, Guid memberId)
     {
@@ -193,6 +218,13 @@ public class ProjectMembersController : ControllerBase
     }
 
     // PUT: api/projects/{projectId}/members/{userId}/role
+    /// <summary>
+    /// Updates the role of a project member.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <param name="memberId">The unique identifier of the user.</param>
+    /// <param name="newRole">The new role to assign.</param>
+    /// <returns>Success message if successful.</returns>
     [HttpPut("{projectId}/members/{memberId}/role")]
     public async Task<ActionResult> UpdateMemberRole(Guid projectId, Guid memberId, [FromBody] ProjectRole newRole)
     {

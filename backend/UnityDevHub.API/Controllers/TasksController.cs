@@ -15,6 +15,9 @@ namespace UnityDevHub.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api")]
+/// <summary>
+/// Controller for managing tasks and their related entities.
+/// </summary>
 public class TasksController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -26,6 +29,11 @@ public class TasksController : ControllerBase
         _projectHub = projectHub;
     }
 
+    /// <summary>
+    /// Retrieves all tasks for a specific project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <returns>A list of tasks associated with the project.</returns>
     [HttpGet("projects/{projectId}/tasks")]
     public async Task<ActionResult<IEnumerable<TaskDto>>> GetTasks(Guid projectId)
     {
@@ -67,6 +75,11 @@ public class TasksController : ControllerBase
         return Ok(tasks);
     }
 
+    /// <summary>
+    /// Retrieves a specific task by ID.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <returns>The task details if found.</returns>
     [HttpGet("tasks/{id}")]
     public async Task<ActionResult<TaskDto>> GetTask(Guid id)
     {
@@ -110,6 +123,12 @@ public class TasksController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Creates a new task in a project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <param name="dto">The task creation data.</param>
+    /// <returns>The created task.</returns>
     [HttpPost("projects/{projectId}/tasks")]
     public async Task<ActionResult<TaskDto>> CreateTask(Guid projectId, CreateTaskDto dto)
     {
@@ -217,6 +236,12 @@ public class TasksController : ControllerBase
         return CreatedAtAction(nameof(GetTask), new { id = task.Id }, taskDto);
     }
 
+    /// <summary>
+    /// Updates an existing task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task to update.</param>
+    /// <param name="dto">The task update data.</param>
+    /// <returns>The updated task details.</returns>
     [HttpPut("tasks/{id}")]
     public async Task<IActionResult> UpdateTask(Guid id, UpdateTaskDto dto)
     {
@@ -311,6 +336,11 @@ public class TasksController : ControllerBase
         return Ok(taskDto);
     }
 
+    /// <summary>
+    /// Deletes a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task to delete.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("tasks/{id}")]
     public async Task<IActionResult> DeleteTask(Guid id)
     {
@@ -326,6 +356,12 @@ public class TasksController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Moves a task to a different column or position.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task to move.</param>
+    /// <param name="dto">The move data including new column and position.</param>
+    /// <returns>No content if successful.</returns>
     [HttpPut("tasks/{id}/move")]
     public async Task<IActionResult> MoveTask(Guid id, MoveTaskDto dto)
     {
@@ -390,6 +426,12 @@ public class TasksController : ControllerBase
     }
 
     // Checklist
+    /// <summary>
+    /// Adds a checklist item to a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="dto">The checklist item creation data.</param>
+    /// <returns>The created checklist item.</returns>
     [HttpPost("tasks/{id}/checklist")]
     public async Task<ActionResult<ChecklistItemDto>> AddChecklistItem(Guid id, CreateChecklistItemDto dto)
     {
@@ -426,6 +468,13 @@ public class TasksController : ControllerBase
         return Ok(itemDto);
     }
 
+    /// <summary>
+    /// Updates a checklist item.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="itemId">The unique identifier of the checklist item.</param>
+    /// <param name="dto">The checklist item update data.</param>
+    /// <returns>The updated checklist item.</returns>
     [HttpPut("tasks/{id}/checklist/{itemId}")]
     public async Task<ActionResult<ChecklistItemDto>> UpdateChecklistItem(Guid id, Guid itemId, UpdateChecklistItemDto dto)
     {
@@ -450,6 +499,12 @@ public class TasksController : ControllerBase
         return Ok(itemDto);
     }
 
+    /// <summary>
+    /// Deletes a checklist item.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="itemId">The unique identifier of the checklist item.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("tasks/{id}/checklist/{itemId}")]
     public async Task<IActionResult> DeleteChecklistItem(Guid id, Guid itemId)
     {
@@ -466,6 +521,12 @@ public class TasksController : ControllerBase
     }
 
     // Comments
+    /// <summary>
+    /// Adds a comment to a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="dto">The comment creation data.</param>
+    /// <returns>The created comment.</returns>
     [HttpPost("tasks/{id}/comments")]
     public async Task<ActionResult<TaskCommentDto>> AddComment(Guid id, CreateCommentDto dto)
     {
@@ -536,6 +597,12 @@ public class TasksController : ControllerBase
         return Ok(commentDto);
     }
 
+    /// <summary>
+    /// Deletes a comment from a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="commentId">The unique identifier of the comment.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("tasks/{id}/comments/{commentId}")]
     public async Task<IActionResult> DeleteComment(Guid id, Guid commentId)
     {
@@ -559,6 +626,12 @@ public class TasksController : ControllerBase
     }
 
     // Tags
+    /// <summary>
+    /// Adds a tag to a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="dto">The tag creation data.</param>
+    /// <returns>The created tag.</returns>
     [HttpPost("tasks/{id}/tags")]
     public async Task<ActionResult<TaskTagDto>> AddTag(Guid id, AddTagDto dto)
     {
@@ -588,6 +661,12 @@ public class TasksController : ControllerBase
         return Ok(tagDto);
     }
 
+    /// <summary>
+    /// Deletes a tag from a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="tagId">The unique identifier of the tag.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("tasks/{id}/tags/{tagId}")]
     public async Task<IActionResult> DeleteTag(Guid id, Guid tagId)
     {
@@ -604,6 +683,12 @@ public class TasksController : ControllerBase
     }
 
     // Attachments
+    /// <summary>
+    /// Uploads an attachment to a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="file">The file to upload.</param>
+    /// <returns>The created attachment details.</returns>
     [HttpPost("tasks/{id}/attachments")]
     public async Task<ActionResult<TaskAttachmentDto>> UploadAttachment(Guid id, IFormFile file)
     {
@@ -660,6 +745,12 @@ public class TasksController : ControllerBase
         return Ok(attachmentDto);
     }
 
+    /// <summary>
+    /// Deletes an attachment from a task.
+    /// </summary>
+    /// <param name="id">The unique identifier of the task.</param>
+    /// <param name="attachmentId">The unique identifier of the attachment.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("tasks/{id}/attachments/{attachmentId}")]
     public async Task<IActionResult> DeleteAttachment(Guid id, Guid attachmentId)
     {

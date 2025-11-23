@@ -13,6 +13,9 @@ namespace UnityDevHub.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api")]
+/// <summary>
+/// Controller for managing task columns in a project.
+/// </summary>
 public class ColumnsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -24,6 +27,11 @@ public class ColumnsController : ControllerBase
         _projectHub = projectHub;
     }
 
+    /// <summary>
+    /// Retrieves all columns for a specific project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <returns>A list of columns associated with the project.</returns>
     [HttpGet("projects/{projectId}/columns")]
     public async Task<ActionResult<IEnumerable<ColumnDto>>> GetColumns(Guid projectId)
     {
@@ -43,6 +51,12 @@ public class ColumnsController : ControllerBase
         return Ok(columns);
     }
 
+    /// <summary>
+    /// Creates a new column in a project.
+    /// </summary>
+    /// <param name="projectId">The unique identifier of the project.</param>
+    /// <param name="dto">The column creation data.</param>
+    /// <returns>The created column.</returns>
     [HttpPost("projects/{projectId}/columns")]
     public async Task<ActionResult<ColumnDto>> CreateColumn(Guid projectId, CreateColumnDto dto)
     {
@@ -82,6 +96,12 @@ public class ColumnsController : ControllerBase
         return CreatedAtAction(nameof(GetColumns), new { projectId }, columnDto);
     }
 
+    /// <summary>
+    /// Updates an existing column.
+    /// </summary>
+    /// <param name="id">The unique identifier of the column to update.</param>
+    /// <param name="dto">The column update data.</param>
+    /// <returns>The updated column details.</returns>
     [HttpPut("columns/{id}")]
     public async Task<IActionResult> UpdateColumn(Guid id, UpdateColumnDto dto)
     {
@@ -107,6 +127,11 @@ public class ColumnsController : ControllerBase
         return Ok(columnDto);
     }
 
+    /// <summary>
+    /// Deletes a column.
+    /// </summary>
+    /// <param name="id">The unique identifier of the column to delete.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("columns/{id}")]
     public async Task<IActionResult> DeleteColumn(Guid id)
     {
@@ -122,6 +147,11 @@ public class ColumnsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Reorders the columns based on the provided list of IDs.
+    /// </summary>
+    /// <param name="columnIds">The list of column IDs in the new order.</param>
+    /// <returns>No content if successful.</returns>
     [HttpPut("columns/reorder")]
     public async Task<IActionResult> ReorderColumns([FromBody] List<Guid> columnIds)
     {

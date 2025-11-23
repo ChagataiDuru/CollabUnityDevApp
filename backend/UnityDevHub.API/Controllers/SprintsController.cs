@@ -10,6 +10,9 @@ namespace UnityDevHub.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api")]
+    /// <summary>
+    /// Controller for managing project sprints.
+    /// </summary>
     public class SprintsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,6 +22,11 @@ namespace UnityDevHub.API.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Retrieves all sprints for a specific project.
+        /// </summary>
+        /// <param name="projectId">The unique identifier of the project.</param>
+        /// <returns>A list of sprints associated with the project.</returns>
         [HttpGet("projects/{projectId}/sprints")]
         public async Task<ActionResult<IEnumerable<SprintDto>>> GetSprints(Guid projectId)
         {
@@ -45,6 +53,11 @@ namespace UnityDevHub.API.Controllers
             return Ok(sprints);
         }
 
+        /// <summary>
+        /// Retrieves a specific sprint by ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the sprint.</param>
+        /// <returns>The sprint details if found.</returns>
         [HttpGet("sprints/{id}")]
         public async Task<ActionResult<SprintDto>> GetSprint(Guid id)
         {
@@ -74,6 +87,12 @@ namespace UnityDevHub.API.Controllers
             return Ok(dto);
         }
 
+        /// <summary>
+        /// Creates a new sprint in a project.
+        /// </summary>
+        /// <param name="projectId">The unique identifier of the project.</param>
+        /// <param name="dto">The sprint creation data.</param>
+        /// <returns>The created sprint.</returns>
         [HttpPost("projects/{projectId}/sprints")]
         public async Task<ActionResult<SprintDto>> CreateSprint(Guid projectId, CreateSprintDto dto)
         {
@@ -116,6 +135,12 @@ namespace UnityDevHub.API.Controllers
             return CreatedAtAction(nameof(GetSprint), new { id = sprint.Id }, sprintDto);
         }
 
+        /// <summary>
+        /// Updates an existing sprint.
+        /// </summary>
+        /// <param name="id">The unique identifier of the sprint to update.</param>
+        /// <param name="dto">The sprint update data.</param>
+        /// <returns>No content if successful.</returns>
         [HttpPut("sprints/{id}")]
         public async Task<IActionResult> UpdateSprint(Guid id, UpdateSprintDto dto)
         {
@@ -135,6 +160,11 @@ namespace UnityDevHub.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a sprint.
+        /// </summary>
+        /// <param name="id">The unique identifier of the sprint to delete.</param>
+        /// <returns>No content if successful.</returns>
         [HttpDelete("sprints/{id}")]
         public async Task<IActionResult> DeleteSprint(Guid id)
         {
@@ -147,6 +177,11 @@ namespace UnityDevHub.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Retrieves burndown chart data for a sprint.
+        /// </summary>
+        /// <param name="id">The unique identifier of the sprint.</param>
+        /// <returns>A list of burndown data points.</returns>
         [HttpGet("sprints/{id}/burndown")]
         public async Task<ActionResult<IEnumerable<BurndownDataDto>>> GetBurndownData(Guid id)
         {

@@ -10,6 +10,9 @@ using UnityDevHub.API.Models.Auth;
 
 namespace UnityDevHub.API.Services;
 
+/// <summary>
+/// Implementation of the IAuthService interface.
+/// </summary>
 public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
@@ -21,6 +24,7 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
+    /// <inheritdoc />
     public async Task<TokenDto> RegisterAsync(RegisterDto dto)
     {
         if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
@@ -44,6 +48,7 @@ public class AuthService : IAuthService
         return await GenerateTokensAsync(user);
     }
 
+    /// <inheritdoc />
     public async Task<TokenDto> LoginAsync(LoginDto dto)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
@@ -55,6 +60,7 @@ public class AuthService : IAuthService
         return await GenerateTokensAsync(user);
     }
 
+    /// <inheritdoc />
     public async Task<TokenDto> RefreshTokenAsync(string accessToken, string refreshToken)
     {
         var principal = GetPrincipalFromExpiredToken(accessToken);
@@ -99,6 +105,7 @@ public class AuthService : IAuthService
         };
     }
 
+    /// <inheritdoc />
     public async Task RevokeRefreshTokenAsync(string refreshToken)
     {
         var storedRefreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);

@@ -11,6 +11,9 @@ namespace UnityDevHub.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
+/// <summary>
+/// Controller for managing projects.
+/// </summary>
 public class ProjectsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -20,6 +23,10 @@ public class ProjectsController : ControllerBase
         _context = context;
     }
 
+    /// <summary>
+    /// Retrieves all projects for the current user.
+    /// </summary>
+    /// <returns>A list of projects the user is a member of.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjects()
     {
@@ -51,6 +58,11 @@ public class ProjectsController : ControllerBase
         return Ok(projects);
     }
 
+    /// <summary>
+    /// Retrieves a specific project by ID.
+    /// </summary>
+    /// <param name="id">The unique identifier of the project.</param>
+    /// <returns>The project details if found and user has access.</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<ProjectDto>> GetProject(Guid id)
     {
@@ -87,6 +99,11 @@ public class ProjectsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Creates a new project.
+    /// </summary>
+    /// <param name="dto">The project creation data.</param>
+    /// <returns>The created project.</returns>
     [HttpPost]
     public async Task<ActionResult<ProjectDto>> CreateProject(CreateProjectDto dto)
     {
@@ -136,6 +153,12 @@ public class ProjectsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Updates an existing project.
+    /// </summary>
+    /// <param name="id">The unique identifier of the project to update.</param>
+    /// <param name="dto">The project update data.</param>
+    /// <returns>No content if successful.</returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProject(Guid id, UpdateProjectDto dto)
     {
@@ -167,6 +190,11 @@ public class ProjectsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes a project.
+    /// </summary>
+    /// <param name="id">The unique identifier of the project to delete.</param>
+    /// <returns>No content if successful.</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProject(Guid id)
     {
