@@ -28,6 +28,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./features/whiteboard/whiteboard.component').then(m => m.WhiteboardComponent)
             },
             {
+                path: 'projects/:id/wiki',
+                loadComponent: () => import('./features/projects/wiki/wiki-layout.component').then(m => m.WikiLayoutComponent)
+            },
+            {
+                path: 'projects/:id/analytics',
+                loadComponent: () => import('./features/projects/analytics/project-analytics.component').then(m => m.ProjectAnalyticsComponent)
+            },
+            {
                 path: 'projects',
                 loadComponent: () => import('./features/projects/project-list/project-list.component').then(m => m.ProjectListComponent)
             },

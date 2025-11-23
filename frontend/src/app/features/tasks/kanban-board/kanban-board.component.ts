@@ -31,6 +31,10 @@ import { SkeletonModule } from 'primeng/skeleton';
                 class="p-button-outlined p-button-secondary p-button-sm"></button>
             <button pButton label="Sprints" icon="pi pi-calendar" (click)="navigateToSprints()" 
                 class="p-button-outlined p-button-secondary p-button-sm"></button>
+            <button pButton label="Wiki" icon="pi pi-book" (click)="navigateToWiki()"
+                class="p-button-outlined p-button-secondary p-button-sm"></button>
+            <button pButton label="Dashboard" icon="pi pi-chart-bar" (click)="navigateToAnalytics()"
+                class="p-button-outlined p-button-secondary p-button-sm"></button>
             <p-button label="Add Column" icon="pi pi-plus" (onClick)="showAddColumnDialog()" styleClass="p-button-sm"></p-button>
         </div>
       </div>
@@ -242,6 +246,20 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
    */
   navigateToSprints() {
     this.router.navigate(['projects', this.projectId, 'sprints']);
+  }
+
+  /**
+   * Navigates to the wiki view.
+   */
+  navigateToWiki() {
+    this.router.navigate(['projects', this.projectId, 'wiki']);
+  }
+
+  /**
+   * Navigates to the analytics view.
+   */
+  navigateToAnalytics() {
+    this.router.navigate(['projects', this.projectId, 'analytics']);
   }
 
   /**
