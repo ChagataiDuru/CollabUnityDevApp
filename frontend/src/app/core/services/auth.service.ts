@@ -7,6 +7,9 @@ import { Router } from '@angular/router';
 @Injectable({
     providedIn: 'root'
 })
+/**
+ * Service to handle user authentication and session management.
+ */
 export class AuthService {
     private apiUrl = 'http://localhost:5000/api/auth';
     private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -18,6 +21,9 @@ export class AuthService {
         this.loadUserFromStorage();
     }
 
+    /**
+     * Loads the user session from local storage.
+     */
     private loadUserFromStorage() {
         const token = localStorage.getItem('accessToken');
         if (token) {
@@ -34,18 +40,31 @@ export class AuthService {
         }
     }
 
+    /**
+     * Registers a new user.
+     * @param data The registration data.
+     * @returns An observable of the token response.
+     */
     register(data: any): Observable<TokenResponse> {
         return this.http.post<TokenResponse>(`${this.apiUrl}/register`, data).pipe(
             tap(response => this.handleAuthResponse(response))
         );
     }
 
+    /**
+     * Logs in a user.
+     * @param data The login credentials.
+     * @returns An observable of the token response.
+     */
     login(data: any): Observable<TokenResponse> {
         return this.http.post<TokenResponse>(`${this.apiUrl}/login`, data).pipe(
             tap(response => this.handleAuthResponse(response))
         );
     }
 
+    /**
+     * Logs out the current user and clears the session.
+     */
     logout() {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
@@ -58,6 +77,10 @@ export class AuthService {
         this.router.navigate(['/login']);
     }
 
+    /**
+     * Handles the authentication response by saving tokens and updating state.
+     * @param response The token response from the server.
+     */
     private handleAuthResponse(response: TokenResponse) {
         localStorage.setItem('accessToken', response.accessToken);
         localStorage.setItem('refreshToken', response.refreshToken);
@@ -71,6 +94,10 @@ export class AuthService {
         });
     }
 
+    /**
+     * Retrieves the current access token.
+     * @returns The access token or null if not found.
+     */
     getAccessToken(): string | null {
         return localStorage.getItem('accessToken');
     }

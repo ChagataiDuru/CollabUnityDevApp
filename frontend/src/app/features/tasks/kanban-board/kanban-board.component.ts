@@ -160,6 +160,9 @@ import { SkeletonModule } from 'primeng/skeleton';
     }
   `]
 })
+/**
+ * Component for the Kanban board, managing columns and tasks.
+ */
 export class KanbanBoardComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -192,6 +195,9 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
 
   private signalRSub: Subscription | null = null;
 
+  /**
+   * Initializes the component, loads the board data, and starts SignalR connection.
+   */
   ngOnInit() {
     this.projectId = this.route.snapshot.paramMap.get('id')!;
     this.loadBoard();
@@ -202,27 +208,45 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Cleans up resources, including the SignalR connection.
+   */
   ngOnDestroy() {
     this.signalRService.stopConnection();
     this.signalRSub?.unsubscribe();
   }
 
+  /**
+   * Navigates to the whiteboard view.
+   */
   navigateToWhiteboard() {
     this.router.navigate(['projects', this.projectId, 'whiteboard']);
   }
 
+  /**
+   * Navigates to the team settings view.
+   */
   navigateToTeamSettings() {
     this.router.navigate(['projects', this.projectId, 'settings']);
   }
 
+  /**
+   * Navigates to the integrations view.
+   */
   navigateToIntegrations() {
     this.router.navigate(['projects', this.projectId, 'integrations']);
   }
 
+  /**
+   * Navigates to the sprints view.
+   */
   navigateToSprints() {
     this.router.navigate(['projects', this.projectId, 'sprints']);
   }
 
+  /**
+   * Loads columns and tasks from the backend.
+   */
   loadBoard() {
     this.isLoadingBoard = true;
     this.taskService.getColumns(this.projectId).subscribe(cols => {
@@ -234,10 +258,20 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Filters and sorts tasks for a specific column.
+   * @param columnId The column ID.
+   * @returns An array of tasks in the column.
+   */
   getTasksByColumn(columnId: string) {
     return this.tasks.filter(t => t.columnId === columnId).sort((a, b) => a.position - b.position);
   }
 
+  /**
+   * Handles drag-and-drop events for tasks.
+   * @param event The drag-drop event.
+   * @param columnId The target column ID.
+   */
   drop(event: CdkDragDrop<Task[]>, columnId: string) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -256,11 +290,17 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Opens the dialog for adding a new column.
+   */
   showAddColumnDialog() {
     this.columnForm.reset({ name: '', color: '#6366f1' });
     this.displayAddColumn = true;
   }
 
+  /**
+   * Creates a new column.
+   */
   createColumn() {
     if (this.columnForm.valid) {
       this.loading = true;
@@ -277,12 +317,19 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Opens the dialog for adding a new task.
+   * @param columnId The column ID where the task will be added.
+   */
   showAddTaskDialog(columnId: string) {
     this.selectedColumnId = columnId;
     this.taskForm.reset({ title: '', content: '', priority: 0 });
     this.displayAddTask = true;
   }
 
+  /**
+   * Creates a new task.
+   */
   createTask() {
     if (this.taskForm.valid) {
       this.loading = true;
@@ -307,11 +354,19 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Opens the task detail view.
+   * @param task The selected task.
+   */
   openTaskDetail(task: Task) {
     this.selectedTask = task;
     this.displayTaskDetail = true;
   }
 
+  /**
+   * Updates a task in the local state.
+   * @param task The updated task.
+   */
   onTaskUpdated(task: Task) {
     const index = this.tasks.findIndex(t => t.id === task.id);
     if (index !== -1) {
@@ -319,12 +374,20 @@ export class KanbanBoardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Removes a task from the local state.
+   * @param taskId The ID of the deleted task.
+   */
   onTaskDeleted(taskId: string) {
     this.tasks = this.tasks.filter(t => t.id !== taskId);
     this.displayTaskDetail = false;
     this.selectedTask = null;
   }
 
+  /**
+   * Handles real-time events from SignalR.
+   * @param event The event data.
+   */
   handleRealTimeEvent(event: any) {
     switch (event.type) {
       case 'TaskCreated':

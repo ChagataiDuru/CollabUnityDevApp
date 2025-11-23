@@ -11,6 +11,9 @@ namespace UnityDevHub.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api")]
+    /// <summary>
+    /// Controller for managing time logs associated with tasks.
+    /// </summary>
     public class TimeLogsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,6 +29,11 @@ namespace UnityDevHub.API.Controllers
             return Guid.Parse(userIdClaim!);
         }
 
+        /// <summary>
+        /// Retrieves all time logs for a specific task.
+        /// </summary>
+        /// <param name="taskId">The unique identifier of the task.</param>
+        /// <returns>A list of time logs.</returns>
         [HttpGet("tasks/{taskId}/timelogs")]
         public async Task<ActionResult<IEnumerable<TimeLogDto>>> GetTimeLogs(Guid taskId)
         {
@@ -51,6 +59,12 @@ namespace UnityDevHub.API.Controllers
             return Ok(timeLogs);
         }
 
+        /// <summary>
+        /// Starts a timer for a task.
+        /// </summary>
+        /// <param name="taskId">The unique identifier of the task.</param>
+        /// <param name="dto">The timer start data.</param>
+        /// <returns>The created time log entry.</returns>
         [HttpPost("tasks/{taskId}/timelogs/start")]
         public async Task<ActionResult<TimeLogDto>> StartTimer(Guid taskId, StartTimerDto dto)
         {
@@ -98,6 +112,11 @@ namespace UnityDevHub.API.Controllers
             });
         }
 
+        /// <summary>
+        /// Stops a running timer.
+        /// </summary>
+        /// <param name="id">The unique identifier of the time log to stop.</param>
+        /// <returns>The updated time log entry.</returns>
         [HttpPut("timelogs/{id}/stop")]
         public async Task<ActionResult<TimeLogDto>> StopTimer(Guid id)
         {
@@ -133,6 +152,12 @@ namespace UnityDevHub.API.Controllers
             });
         }
 
+        /// <summary>
+        /// Creates a manual time log entry.
+        /// </summary>
+        /// <param name="taskId">The unique identifier of the task.</param>
+        /// <param name="dto">The manual time log data.</param>
+        /// <returns>The created time log entry.</returns>
         [HttpPost("tasks/{taskId}/timelogs/manual")]
         public async Task<ActionResult<TimeLogDto>> CreateManualTimeLog(Guid taskId, CreateManualTimeLogDto dto)
         {
@@ -178,6 +203,11 @@ namespace UnityDevHub.API.Controllers
             });
         }
 
+        /// <summary>
+        /// Deletes a time log entry.
+        /// </summary>
+        /// <param name="id">The unique identifier of the time log to delete.</param>
+        /// <returns>No content if successful.</returns>
         [HttpDelete("timelogs/{id}")]
         public async Task<IActionResult> DeleteTimeLog(Guid id)
         {
@@ -193,6 +223,13 @@ namespace UnityDevHub.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Generates a time report for a project within a date range.
+        /// </summary>
+        /// <param name="projectId">The unique identifier of the project.</param>
+        /// <param name="startDate">The start date for the report (optional).</param>
+        /// <param name="endDate">The end date for the report (optional).</param>
+        /// <returns>A report containing total hours, hours by user, and hours by task.</returns>
         [HttpGet("projects/{projectId}/timelogs/report")]
         public async Task<ActionResult> GetTimeReport(Guid projectId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
         {

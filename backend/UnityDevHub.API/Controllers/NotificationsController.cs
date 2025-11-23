@@ -13,6 +13,9 @@ namespace UnityDevHub.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    /// <summary>
+    /// Controller for managing user notifications.
+    /// </summary>
     public class NotificationsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -22,6 +25,10 @@ namespace UnityDevHub.API.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Retrieves all notifications for the current user.
+        /// </summary>
+        /// <returns>A list of notifications.</returns>
         [HttpGet]
         public async Task<IActionResult> GetNotifications()
         {
@@ -46,6 +53,11 @@ namespace UnityDevHub.API.Controllers
             return Ok(notifications);
         }
 
+        /// <summary>
+        /// Marks a specific notification as read.
+        /// </summary>
+        /// <param name="id">The unique identifier of the notification.</param>
+        /// <returns>OK if successful.</returns>
         [HttpPut("{id}/read")]
         public async Task<IActionResult> MarkAsRead(Guid id)
         {
@@ -63,6 +75,10 @@ namespace UnityDevHub.API.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Marks all notifications as read for the current user.
+        /// </summary>
+        /// <returns>OK if successful.</returns>
         [HttpPut("read-all")]
         public async Task<IActionResult> MarkAllAsRead()
         {
@@ -82,6 +98,11 @@ namespace UnityDevHub.API.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Deletes a specific notification.
+        /// </summary>
+        /// <param name="id">The unique identifier of the notification to delete.</param>
+        /// <returns>OK if successful.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNotification(Guid id)
         {

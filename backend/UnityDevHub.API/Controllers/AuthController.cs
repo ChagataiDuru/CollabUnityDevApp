@@ -6,6 +6,9 @@ namespace UnityDevHub.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+/// <summary>
+/// Controller for user authentication and authorization.
+/// </summary>
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -15,6 +18,11 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    /// <summary>
+    /// Registers a new user.
+    /// </summary>
+    /// <param name="dto">The registration data.</param>
+    /// <returns>The authentication tokens if successful.</returns>
     [HttpPost("register")]
     public async Task<ActionResult<TokenDto>> Register(RegisterDto dto)
     {
@@ -29,6 +37,11 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Logs in an existing user.
+    /// </summary>
+    /// <param name="dto">The login credentials.</param>
+    /// <returns>The authentication tokens if successful.</returns>
     [HttpPost("login")]
     public async Task<ActionResult<TokenDto>> Login(LoginDto dto)
     {
@@ -43,6 +56,11 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Refreshes the access token using a refresh token.
+    /// </summary>
+    /// <param name="tokenDto">The token data containing the expired access token and refresh token.</param>
+    /// <returns>New authentication tokens if successful.</returns>
     [HttpPost("refresh")]
     public async Task<ActionResult<TokenDto>> Refresh([FromBody] TokenDto tokenDto)
     {
@@ -57,6 +75,11 @@ public class AuthController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Logs out a user by revoking the refresh token.
+    /// </summary>
+    /// <param name="tokenDto">The token data containing the refresh token to revoke.</param>
+    /// <returns>No content if successful.</returns>
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] TokenDto tokenDto)
     {

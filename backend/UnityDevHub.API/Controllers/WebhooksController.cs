@@ -5,6 +5,9 @@ namespace UnityDevHub.API.Controllers
 {
     [ApiController]
     [Route("api/webhooks")]
+    /// <summary>
+    /// Controller for handling external webhooks, such as GitHub events.
+    /// </summary>
     public class WebhooksController : ControllerBase
     {
         private readonly IVcsService _vcsService;
@@ -16,6 +19,10 @@ namespace UnityDevHub.API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Handles incoming GitHub webhooks.
+        /// </summary>
+        /// <returns>OK if processed successfully.</returns>
         [HttpPost("github")]
         public async Task<IActionResult> GitHubWebhook()
         {

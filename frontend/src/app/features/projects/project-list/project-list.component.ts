@@ -95,6 +95,9 @@ import { ToastModule } from 'primeng/toast';
     </div>
   `
 })
+/**
+ * Component for displaying the list of projects and managing project creation/deletion.
+ */
 export class ProjectListComponent implements OnInit {
   private projectService = inject(ProjectService);
   private fb = inject(FormBuilder);
@@ -110,10 +113,16 @@ export class ProjectListComponent implements OnInit {
     colorTheme: ['#6366f1']
   });
 
+  /**
+   * Initializes the component and loads projects.
+   */
   ngOnInit() {
     this.loadProjects();
   }
 
+  /**
+   * Loads the list of projects from the service.
+   */
   loadProjects() {
     this.projectService.getProjects().subscribe({
       next: (data) => this.projects = data,
@@ -121,11 +130,17 @@ export class ProjectListComponent implements OnInit {
     });
   }
 
+  /**
+   * Opens the dialog for creating a new project.
+   */
   showCreateDialog() {
     this.createForm.reset({ colorTheme: '#6366f1' });
     this.displayCreateDialog = true;
   }
 
+  /**
+   * Submits the project creation form.
+   */
   createProject() {
     if (this.createForm.valid) {
       this.loading = true;
@@ -144,6 +159,11 @@ export class ProjectListComponent implements OnInit {
     }
   }
 
+  /**
+   * Deletes a project.
+   * @param event The click event to stop propagation.
+   * @param id The ID of the project to delete.
+   */
   deleteProject(event: Event, id: string) {
     event.stopPropagation();
     if (confirm('Are you sure you want to delete this project?')) {
