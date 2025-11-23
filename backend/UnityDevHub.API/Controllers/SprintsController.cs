@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UnityDevHub.API.Data;
 using UnityDevHub.API.Data.Entities;
+using UnityDevHub.API.Extensions;
 using UnityDevHub.API.Models.Sprint;
 
 namespace UnityDevHub.API.Controllers
@@ -13,7 +14,7 @@ namespace UnityDevHub.API.Controllers
     /// <summary>
     /// Controller for managing project sprints.
     /// </summary>
-    public class SprintsController : ControllerBase
+    public class SprintsController : BaseController
     {
         private readonly ApplicationDbContext _context;
 
@@ -81,7 +82,7 @@ namespace UnityDevHub.API.Controllers
                 CreatedAt = sprint.CreatedAt,
                 UpdatedAt = sprint.UpdatedAt,
                 TaskCount = sprint.Tasks.Count,
-                CompletedTaskCount = sprint.Tasks.Count(t => t.Column?.Name == "Done" || t.Column?.Name == "Completed")
+                CompletedTaskCount = sprint.Tasks.Count(t => t.Column.IsCompleted())
             };
 
             return Ok(dto);
@@ -204,7 +205,7 @@ namespace UnityDevHub.API.Controllers
                 // Count tasks completed before or on current date
                 var completedByDate = sprint.Tasks.Count(t => 
                     t.UpdatedAt <= currentDate && 
-                    (t.Column?.Name == "Done" || t.Column?.Name == "Completed")
+                    t.Column.IsCompleted()
                 );
 
                 var remainingTasks = totalTasks - completedByDate;
