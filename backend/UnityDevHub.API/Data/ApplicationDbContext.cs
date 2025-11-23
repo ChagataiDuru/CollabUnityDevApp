@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Build> Builds { get; set; }
     public DbSet<Sprint> Sprints { get; set; }
     public DbSet<TimeLog> TimeLogs { get; set; }
+    public DbSet<WikiPage> WikiPages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -197,5 +198,26 @@ public class ApplicationDbContext : DbContext
             .WithMany()
             .HasForeignKey(tl => tl.UserId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        // WikiPage - Project
+        modelBuilder.Entity<WikiPage>()
+            .HasOne(w => w.Project)
+            .WithMany()
+            .HasForeignKey(w => w.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // WikiPage - Parent/Children
+        modelBuilder.Entity<WikiPage>()
+            .HasOne(w => w.Parent)
+            .WithMany(w => w.Children)
+            .HasForeignKey(w => w.ParentId)
+            .OnDelete(DeleteBehavior.NoAction); // Avoid cycles in cascade delete, handle manually or let DB handle if possible, but NoAction is safer for self-ref
+
+        // WikiPage - User (LastEditor)
+        modelBuilder.Entity<WikiPage>()
+            .HasOne(w => w.LastEditor)
+            .WithMany()
+            .HasForeignKey(w => w.LastEditorId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
