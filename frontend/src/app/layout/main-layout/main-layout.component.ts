@@ -11,7 +11,7 @@ import { ToastModule } from 'primeng/toast';
     template: `
     <div class="min-h-screen bg-gray-950 flex flex-col">
       <app-navbar></app-navbar>
-      <main class="flex-1 relative">
+      <main class="flex-1 relative flex flex-col">
         <router-outlet></router-outlet>
       </main>
       <p-toast position="bottom-right"></p-toast>
