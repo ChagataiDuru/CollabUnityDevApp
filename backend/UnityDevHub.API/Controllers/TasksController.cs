@@ -381,6 +381,9 @@ public class TasksController : ControllerBase
                 .OrderBy(t => t.Position)
                 .ToListAsync();
 
+            if (newPosition < 0) newPosition = 0;
+            if (newPosition > tasksInColumn.Count) newPosition = tasksInColumn.Count;
+
             tasksInColumn.Insert(newPosition, task);
 
             for (int i = 0; i < tasksInColumn.Count; i++)
@@ -407,6 +410,9 @@ public class TasksController : ControllerBase
                 .Where(t => t.ColumnId == newColumnId)
                 .OrderBy(t => t.Position)
                 .ToListAsync();
+
+            if (newPosition < 0) newPosition = 0;
+            if (newPosition > tasksInNewColumn.Count) newPosition = tasksInNewColumn.Count;
 
             task.ColumnId = newColumnId;
             tasksInNewColumn.Insert(newPosition, task);
