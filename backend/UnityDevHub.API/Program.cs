@@ -31,6 +31,10 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
 // Authentication
 builder.Services.AddScoped<UnityDevHub.API.Services.IAuthService, UnityDevHub.API.Services.AuthService>();
 builder.Services.AddScoped<UnityDevHub.API.Services.IVcsService, UnityDevHub.API.Services.VcsService>();
+builder.Services.AddScoped<UnityDevHub.API.Services.IDocumentationService, UnityDevHub.API.Services.DocumentationService>();
+
+builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Project, CreateProjectDto } from '../models/project.model';
 
 @Injectable({
@@ -12,6 +12,8 @@ import { Project, CreateProjectDto } from '../models/project.model';
 export class ProjectService {
     private http = inject(HttpClient);
     private apiUrl = 'http://localhost:5000/api/projects';
+
+    currentProject = signal<Project | null>(null);
 
     /**
      * Retrieves all projects for the current user.
@@ -27,7 +29,9 @@ export class ProjectService {
      * @returns An observable containing the project details.
      */
     getProject(id: string): Observable<Project> {
-        return this.http.get<Project>(`${this.apiUrl}/${id}`);
+        return this.http.get<Project>(`${this.apiUrl}/${id}`).pipe(
+            tap(project => this.currentProject.set(project))
+        );
     }
 
     /**

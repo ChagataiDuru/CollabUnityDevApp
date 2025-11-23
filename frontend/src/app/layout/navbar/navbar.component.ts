@@ -5,6 +5,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { DocumentationService } from '../../core/services/documentation.service';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
@@ -26,6 +27,7 @@ export class NavbarComponent {
     authService = inject(AuthService);
     notificationService = inject(NotificationService);
     themeService = inject(ThemeService);
+    docService = inject(DocumentationService);
 
     currentUser = toSignal(this.authService.currentUser$);
     notifications = this.notificationService.notifications;

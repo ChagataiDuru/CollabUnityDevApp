@@ -17,6 +17,12 @@
     </div>
 
     <div class="flex items-center gap-3">
+        <!-- Docs Toggle -->
+        <button pButton icon="pi pi-book"
+            class="p-button-rounded p-button-text text-slate-300 hover:text-white hover:bg-slate-700"
+            (click)="docService.togglePanel()" pTooltip="Unity Docs" tooltipPosition="bottom">
+        </button>
+
         <!-- Theme Toggle -->
         <button pButton [icon]="themeService.isDark() ? 'pi pi-sun' : 'pi pi-moon'"
             class="p-button-rounded p-button-outlined text-white hover:bg-slate-700 border-slate-600"
