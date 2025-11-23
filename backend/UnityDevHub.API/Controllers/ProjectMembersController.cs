@@ -17,7 +17,7 @@ namespace UnityDevHub.API.Controllers;
 /// <summary>
 /// Controller for managing project members and their roles.
 /// </summary>
-public class ProjectMembersController : ControllerBase
+public class ProjectMembersController : BaseController
 {
     private readonly ApplicationDbContext _context;
     private readonly IHubContext<ProjectHub> _hubContext;
@@ -27,8 +27,6 @@ public class ProjectMembersController : ControllerBase
         _context = context;
         _hubContext = hubContext;
     }
-
-    private Guid GetUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "");
 
     private async Task<ProjectRole?> GetUserRole(Guid projectId, Guid userId)
     {
@@ -46,8 +44,7 @@ public class ProjectMembersController : ControllerBase
     [HttpGet("{projectId}/members")]
     public async Task<ActionResult<List<ProjectMemberDto>>> GetProjectMembers(Guid projectId)
     {
-        var userId = GetUserId();
-        var userRole = await GetUserRole(projectId, userId);
+        var userRole = await GetUserRole(projectId, UserId);
         
         if (userRole == null)
         {
@@ -112,8 +109,7 @@ public class ProjectMembersController : ControllerBase
     [HttpPost("{projectId}/members")]
     public async Task<ActionResult<ProjectMemberDto>> AddMember(Guid projectId, [FromBody] AddMemberDto dto)
     {
-        var currentUserId = GetUserId();
-        var currentUserRole = await GetUserRole(projectId, currentUserId);
+        var currentUserRole = await GetUserRole(projectId, UserId);
 
         // Only Owners and Admins can add members
         if (currentUserRole != ProjectRole.Owner && currentUserRole != ProjectRole.Admin)
@@ -177,7 +173,7 @@ public class ProjectMembersController : ControllerBase
     [HttpDelete("{projectId}/members/{memberId}")]
     public async Task<ActionResult> RemoveMember(Guid projectId, Guid memberId)
     {
-        var currentUserId = GetUserId();
+        var currentUserId = UserId;
         var currentUserRole = await GetUserRole(projectId, currentUserId);
 
         // Only Owners and Admins can remove members
@@ -228,8 +224,7 @@ public class ProjectMembersController : ControllerBase
     [HttpPut("{projectId}/members/{memberId}/role")]
     public async Task<ActionResult> UpdateMemberRole(Guid projectId, Guid memberId, [FromBody] ProjectRole newRole)
     {
-        var currentUserId = GetUserId();
-        var currentUserRole = await GetUserRole(projectId, currentUserId);
+        var currentUserRole = await GetUserRole(projectId, UserId);
 
         // Only Owners can update roles
         if (currentUserRole != ProjectRole.Owner)

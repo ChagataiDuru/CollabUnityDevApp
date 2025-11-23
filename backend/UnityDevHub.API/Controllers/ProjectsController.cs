@@ -14,7 +14,7 @@ namespace UnityDevHub.API.Controllers;
 /// <summary>
 /// Controller for managing projects.
 /// </summary>
-public class ProjectsController : ControllerBase
+public class ProjectsController : BaseController
 {
     private readonly ApplicationDbContext _context;
 
@@ -30,11 +30,9 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProjectDto>>> GetProjects()
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         // Get all projects where user is a member
         var projectIds = await _context.ProjectMembers
-            .Where(pm => pm.UserId == userId)
+            .Where(pm => pm.UserId == UserId)
             .Select(pm => pm.ProjectId)
             .ToListAsync();
 
@@ -66,11 +64,9 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<ProjectDto>> GetProject(Guid id)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         // Check if user is a member
         var isMember = await _context.ProjectMembers
-            .AnyAsync(pm => pm.ProjectId == id && pm.UserId == userId);
+            .AnyAsync(pm => pm.ProjectId == id && pm.UserId == UserId);
 
         if (!isMember)
         {
@@ -107,14 +103,12 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ProjectDto>> CreateProject(CreateProjectDto dto)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         var project = new Project
         {
             Name = dto.Name,
             Description = dto.Description,
             ColorTheme = dto.ColorTheme,
-            CreatedById = userId
+            CreatedById = UserId
         };
 
         _context.Projects.Add(project);
@@ -133,7 +127,7 @@ public class ProjectsController : ControllerBase
         var ownerMember = new ProjectMember
         {
             ProjectId = project.Id,
-            UserId = userId,
+            UserId = UserId,
             Role = ProjectRole.Owner
         };
         _context.ProjectMembers.Add(ownerMember);
@@ -162,11 +156,9 @@ public class ProjectsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProject(Guid id, UpdateProjectDto dto)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
         // Check permissions (Owner or Admin)
         var member = await _context.ProjectMembers
-            .FirstOrDefaultAsync(pm => pm.ProjectId == id && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == id && pm.UserId == UserId);
 
         if (member == null || (member.Role != ProjectRole.Owner && member.Role != ProjectRole.Admin))
         {
@@ -198,11 +190,9 @@ public class ProjectsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProject(Guid id)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
         // Only Owner can delete
         var member = await _context.ProjectMembers
-            .FirstOrDefaultAsync(pm => pm.ProjectId == id && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == id && pm.UserId == UserId);
 
         if (member == null || member.Role != ProjectRole.Owner)
         {

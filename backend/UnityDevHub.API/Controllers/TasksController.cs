@@ -9,6 +9,7 @@ using UnityDevHub.API.Data.Entities;
 using UnityDevHub.API.Hubs;
 using UnityDevHub.API.Models.Task;
 using UnityDevHub.API.Models.Notification;
+using UnityDevHub.API.Services;
 
 namespace UnityDevHub.API.Controllers;
 
@@ -18,15 +19,17 @@ namespace UnityDevHub.API.Controllers;
 /// <summary>
 /// Controller for managing tasks and their related entities.
 /// </summary>
-public class TasksController : ControllerBase
+public class TasksController : BaseController
 {
     private readonly ApplicationDbContext _context;
     private readonly IHubContext<ProjectHub> _projectHub;
+    private readonly INotificationService _notificationService;
 
-    public TasksController(ApplicationDbContext context, IHubContext<ProjectHub> projectHub)
+    public TasksController(ApplicationDbContext context, IHubContext<ProjectHub> projectHub, INotificationService notificationService)
     {
         _context = context;
         _projectHub = projectHub;
+        _notificationService = notificationService;
     }
 
     /// <summary>
@@ -132,8 +135,6 @@ public class TasksController : ControllerBase
     [HttpPost("projects/{projectId}/tasks")]
     public async Task<ActionResult<TaskDto>> CreateTask(Guid projectId, CreateTaskDto dto)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
         // Get max position in column
         var maxPos = await _context.Tasks
             .Where(t => t.ColumnId == dto.ColumnId)
@@ -157,7 +158,7 @@ public class TasksController : ControllerBase
             EstimatedHours = dto.EstimatedHours,
             Position = maxPos + 1,
             TaskNumber = maxTaskNum + 1,
-            CreatedById = userId,
+            CreatedById = UserId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -201,36 +202,15 @@ public class TasksController : ControllerBase
         await _projectHub.Clients.Group(projectId.ToString()).SendAsync("TaskCreated", taskDto);
 
         // Notification: Task Assignment
-        if (task.AssignedToId.HasValue && task.AssignedToId != userId)
+        if (task.AssignedToId.HasValue && task.AssignedToId != UserId)
         {
-            var notification = new Notification
-            {
-                Id = Guid.NewGuid(),
-                UserId = task.AssignedToId.Value,
-                Title = "New Task Assignment",
-                Message = $"You have been assigned to task: {task.Title}",
-                Type = "Info",
-                RelatedEntityId = task.Id,
-                RelatedEntityType = "Task",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync();
-
-            var notificationDto = new NotificationDto
-            {
-                Id = notification.Id,
-                Title = notification.Title,
-                Message = notification.Message,
-                Type = notification.Type,
-                IsRead = notification.IsRead,
-                CreatedAt = notification.CreatedAt,
-                RelatedEntityId = notification.RelatedEntityId,
-                RelatedEntityType = notification.RelatedEntityType
-            };
-
-            await _projectHub.Clients.User(task.AssignedToId.Value.ToString()).SendAsync("NotificationReceived", notificationDto);
+            await _notificationService.SendNotificationAsync(
+                task.AssignedToId.Value,
+                "New Task Assignment",
+                $"You have been assigned to task: {task.Title}",
+                "Info",
+                task.Id,
+                "Task");
         }
 
         return CreatedAtAction(nameof(GetTask), new { id = task.Id }, taskDto);
@@ -261,37 +241,16 @@ public class TasksController : ControllerBase
         await _context.SaveChangesAsync();
 
         // Notification: Task Assignment Change
-        var currentUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var currentUserId = UserId;
         if (task.AssignedToId.HasValue && task.AssignedToId != oldAssignedToId && task.AssignedToId != currentUserId)
         {
-            var notification = new Notification
-            {
-                Id = Guid.NewGuid(),
-                UserId = task.AssignedToId.Value,
-                Title = "Task Assignment",
-                Message = $"You have been assigned to task: {task.Title}",
-                Type = "Info",
-                RelatedEntityId = task.Id,
-                RelatedEntityType = "Task",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync();
-
-            var notificationDto = new NotificationDto
-            {
-                Id = notification.Id,
-                Title = notification.Title,
-                Message = notification.Message,
-                Type = notification.Type,
-                IsRead = notification.IsRead,
-                CreatedAt = notification.CreatedAt,
-                RelatedEntityId = notification.RelatedEntityId,
-                RelatedEntityType = notification.RelatedEntityType
-            };
-
-            await _projectHub.Clients.User(task.AssignedToId.Value.ToString()).SendAsync("NotificationReceived", notificationDto);
+            await _notificationService.SendNotificationAsync(
+                task.AssignedToId.Value,
+                "Task Assignment",
+                $"You have been assigned to task: {task.Title}",
+                "Info",
+                task.Id,
+                "Task");
         }
 
         // Fetch updated task with details
@@ -533,13 +492,11 @@ public class TasksController : ControllerBase
         var task = await _context.Tasks.FindAsync(id);
         if (task == null) return NotFound();
 
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
         var comment = new TaskComment
         {
             Id = Guid.NewGuid(),
             TaskId = id,
-            UserId = userId,
+            UserId = UserId,
             Content = dto.Content,
             CreatedAt = DateTime.UtcNow
         };
@@ -547,14 +504,14 @@ public class TasksController : ControllerBase
         _context.TaskComments.Add(comment);
         await _context.SaveChangesAsync();
 
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.FindAsync(UserId);
 
         var commentDto = new TaskCommentDto
         {
             Id = comment.Id,
             Content = comment.Content,
             CreatedAt = comment.CreatedAt,
-            UserId = userId,
+            UserId = UserId,
             UserName = user?.DisplayName ?? "Unknown",
             UserAvatar = user?.AvatarUrl
         };
@@ -562,36 +519,15 @@ public class TasksController : ControllerBase
         await _projectHub.Clients.Group(task.ProjectId.ToString()).SendAsync("CommentAdded", id, commentDto);
 
         // Notification: Comment on assigned task
-        if (task.AssignedToId.HasValue && task.AssignedToId != userId)
+        if (task.AssignedToId.HasValue && task.AssignedToId != UserId)
         {
-            var notification = new Notification
-            {
-                Id = Guid.NewGuid(),
-                UserId = task.AssignedToId.Value,
-                Title = "New Comment",
-                Message = $"{user?.DisplayName ?? "Someone"} commented on task: {task.Title}",
-                Type = "Info",
-                RelatedEntityId = task.Id,
-                RelatedEntityType = "Task",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Notifications.Add(notification);
-            await _context.SaveChangesAsync();
-
-            var notificationDto = new NotificationDto
-            {
-                Id = notification.Id,
-                Title = notification.Title,
-                Message = notification.Message,
-                Type = notification.Type,
-                IsRead = notification.IsRead,
-                CreatedAt = notification.CreatedAt,
-                RelatedEntityId = notification.RelatedEntityId,
-                RelatedEntityType = notification.RelatedEntityType
-            };
-
-            await _projectHub.Clients.User(task.AssignedToId.Value.ToString()).SendAsync("NotificationReceived", notificationDto);
+            await _notificationService.SendNotificationAsync(
+                task.AssignedToId.Value,
+                "New Comment",
+                $"{user?.DisplayName ?? "Someone"} commented on task: {task.Title}",
+                "Info",
+                task.Id,
+                "Task");
         }
 
         return Ok(commentDto);
@@ -610,8 +546,7 @@ public class TasksController : ControllerBase
         if (comment == null) return NotFound();
 
         // Check permissions (only author or admin/project owner - for now just author)
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        if (comment.UserId != userId)
+        if (comment.UserId != UserId)
         {
             return Forbid();
         }
@@ -698,8 +633,6 @@ public class TasksController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded.");
 
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
         // Ensure directory exists
         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         if (!Directory.Exists(uploadsFolder))
@@ -721,14 +654,14 @@ public class TasksController : ControllerBase
             FilePath = $"/uploads/{uniqueFileName}",
             FileSize = file.Length,
             ContentType = file.ContentType,
-            UploadedById = userId,
+            UploadedById = UserId,
             UploadedAt = DateTime.UtcNow
         };
 
         _context.TaskAttachments.Add(attachment);
         await _context.SaveChangesAsync();
 
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.FindAsync(UserId);
 
         var attachmentDto = new TaskAttachmentDto
         {
@@ -736,7 +669,7 @@ public class TasksController : ControllerBase
             FileName = attachment.FileName,
             FilePath = attachment.FilePath,
             UploadedAt = attachment.UploadedAt,
-            UploadedById = userId,
+            UploadedById = UserId,
             UploadedByName = user?.DisplayName ?? "Unknown"
         };
 
