@@ -1,0 +1,21 @@
+:host {
+    display: block;
+}
+
+/* Custom scrollbar for notifications */
+.max-h-96::-webkit-scrollbar {
+    width: 6px;
+}
+
+.max-h-96::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+
+.max-h-96::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 3px;
+}
+
+.max-h-96::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}

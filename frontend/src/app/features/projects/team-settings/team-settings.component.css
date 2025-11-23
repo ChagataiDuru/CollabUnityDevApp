@@ -1,0 +1,24 @@
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+::ng-deep .custom-table .p-datatable .p-datatable-thead>tr>th {
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: #475569;
+}
+
+::ng-deep .custom-table .p-datatable .p-datatable-tbody>tr {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+::ng-deep .custom-table .p-datatable .p-datatable-tbody>tr:hover {
+    background: #1e293b;
+}
+
+::ng-deep .custom-table .p-datatable .p-datatable-tbody>tr>td {
+    border-color: #475569;
+}

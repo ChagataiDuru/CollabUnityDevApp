@@ -1,0 +1,345 @@
+<p-dialog [(visible)]="visible" [modal]="true" [style]="{width: '900px', maxWidth: '95vw'}" [header]="' '"
+    (onHide)="close()" styleClass="task-detail-dialog" [contentStyle]="{'padding': '0', 'background-color': '#0f172a'}"
+    [maskStyle]="{'background-color': 'rgba(0, 0, 0, 0.7)'}">
+
+    <div class="flex h-[80vh] text-slate-200" *ngIf="task">
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-y-auto border-r border-slate-700">
+            <!-- Header -->
+            <div class="mb-6">
+                <div class="flex items-start justify-between gap-4 mb-2">
+                    <div class="flex-1">
+                        <h2 *ngIf="!editMode.title" (click)="editMode.title = true"
+                            class="text-2xl font-bold text-white cursor-text hover:bg-slate-800 p-1 rounded -ml-1 transition-colors">
+                            {{ task.title }}
+                        </h2>
+                        <div class="mb-8">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="pi pi-align-left text-slate-400"></i>
+                                <h3 class="font-semibold text-lg">Description</h3>
+                            </div>
+
+                            <div *ngIf="!editMode.description" (click)="editMode.description = true"
+                                class="min-h-[100px] p-3 rounded bg-slate-800/50 hover:bg-slate-800 cursor-text transition-colors prose prose-invert max-w-none"
+                                [innerHTML]="task.description || 'Add a more detailed description...'">
+                            </div>
+
+                            <div *ngIf="editMode.description">
+                                <p-editor [formControl]="detailsForm.controls.description" [style]="{'height':'200px'}"
+                                    styleClass="mb-2"></p-editor>
+                                <div class="flex gap-2">
+                                    <p-button label="Save" (onClick)="updateTaskField('description')"
+                                        styleClass="p-button-sm"></p-button>
+                                    <p-button label="Cancel" (onClick)="editMode.description = false"
+                                        styleClass="p-button-text p-button-sm text-slate-400"></p-button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checklist -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-check-square text-slate-400"></i>
+                                    <h3 class="font-semibold text-lg">Checklist</h3>
+                                </div>
+                                <span class="text-sm text-slate-400">{{ checklistProgress }}%</span>
+                            </div>
+
+                            <p-progressBar [value]="checklistProgress" [showValue]="false"
+                                styleClass="h-2 mb-4 bg-slate-700"
+                                [color]="checklistProgress === 100 ? '#22c55e' : '#6366f1'"></p-progressBar>
+
+                            <div class="space-y-2 mb-4">
+                                <div *ngFor="let item of task.checklistItems"
+                                    class="flex items-center gap-3 group hover:bg-slate-800/50 p-2 rounded transition-colors">
+                                    <p-checkbox [binary]="true" [(ngModel)]="item.isCompleted"
+                                        (onChange)="toggleChecklistItem(item)"></p-checkbox>
+                                    <span [class.line-through]="item.isCompleted"
+                                        [class.text-slate-500]="item.isCompleted" class="flex-1">{{ item.title }}</span>
+                                    <button (click)="deleteChecklistItem(item.id)"
+                                        class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-opacity">
+                                        <i class="pi pi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2" [formGroup]="checklistForm">
+                                <input pInputText formControlName="title" placeholder="Add an item..."
+                                    class="flex-1 bg-slate-800 border-slate-700 text-sm"
+                                    (keydown.enter)="addChecklistItem()">
+                                <p-button label="Add" (onClick)="addChecklistItem()" [disabled]="checklistForm.invalid"
+                                    styleClass="p-button-sm p-button-outlined"></p-button>
+                            </div>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="mb-8">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="pi pi-paperclip text-slate-400"></i>
+                                <h3 class="font-semibold text-lg">Attachments</h3>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div *ngFor="let file of task.attachments"
+                                    class="group relative bg-slate-800 rounded p-3 flex items-center gap-3 hover:bg-slate-700 transition-colors">
+                                    <div
+                                        class="w-10 h-10 rounded bg-slate-600 flex items-center justify-center text-slate-300 font-bold uppercase">
+                                        {{ file.fileName.split('.').pop() }}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="truncate font-medium text-sm" [title]="file.fileName">{{
+                                            file.fileName }}</div>
+                                        <div class="text-xs text-slate-500">{{ file.uploadedAt | date:'MMM d, y' }}
+                                        </div>
+                                    </div>
+                                    <a [href]="'http://localhost:5000' + file.filePath" target="_blank"
+                                        class="absolute inset-0" download></a>
+                                    <button (click)="deleteAttachment(file.id); $event.stopPropagation()"
+                                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-slate-900/80 text-slate-400 hover:text-red-400 w-6 h-6 rounded flex items-center justify-center transition-all z-10">
+                                        <i class="pi pi-times text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <p-fileUpload mode="basic" name="file" [customUpload]="true"
+                                (uploadHandler)="onFileUpload($event)" [auto]="true" chooseLabel="Add Attachment"
+                                styleClass="p-button-sm p-button-outlined"></p-fileUpload>
+                        </div>
+
+                        <!-- Commits -->
+                        <div class="mb-8" *ngIf="task.commits && task.commits.length > 0">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="pi pi-github text-slate-400"></i>
+                                <h3 class="font-semibold text-lg">Linked Commits</h3>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div *ngFor="let commit of task.commits"
+                                    class="bg-slate-800 p-3 rounded flex items-center justify-between">
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-mono text-xs bg-slate-900 px-1 rounded text-blue-400">{{
+                                                commit.hash.substring(0, 7) }}</span>
+                                            <span class="text-sm font-medium">{{ commit.message }}</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 mt-1">
+                                            {{ commit.authorName }} • {{ commit.timestamp | date:'short' }}
+                                        </div>
+                                    </div>
+                                    <a [href]="commit.url" target="_blank" class="text-slate-400 hover:text-white">
+                                        <i class="pi pi-external-link"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time Tracking -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-clock text-slate-400"></i>
+                                    <h3 class="font-semibold text-lg">Time Tracking</h3>
+                                    <span class="text-sm text-slate-500">Total: {{ getTotalTimeLogged() }}</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <p-button *ngIf="!activeTimer" label="Start Timer" icon="pi pi-play"
+                                        (onClick)="startTimer()" styleClass="p-button-sm p-button-success"></p-button>
+                                    <p-button *ngIf="activeTimer" [label]="timerElapsed" icon="pi pi-stop"
+                                        (onClick)="stopTimer()" styleClass="p-button-sm p-button-danger"></p-button>
+                                    <p-button label="Add Manual" icon="pi pi-plus" (onClick)="showAddManualTime()"
+                                        styleClass="p-button-sm p-button-outlined"></p-button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 max-h-64 overflow-y-auto">
+                                <div *ngFor="let log of timeLogs"
+                                    class="bg-slate-800 p-3 rounded flex items-center justify-between">
+                                    <div class="flex flex-col flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold text-sm">{{ formatDuration(log.durationMinutes)
+                                                }}</span>
+                                            <span *ngIf="log.isManual"
+                                                class="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded">Manual</span>
+                                            <span *ngIf="!log.endTime"
+                                                class="text-xs bg-green-900 text-green-300 px-2 py-0.5 rounded animate-pulse">Running</span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 mt-1">
+                                            {{ log.userName }} • {{ log.createdAt | date:'short' }}
+                                        </div>
+                                        <div *ngIf="log.description" class="text-sm text-slate-400 mt-1">{{
+                                            log.description }}</div>
+                                    </div>
+                                    <button *ngIf="log.userId === currentUserId" (click)="deleteTimeLog(log.id)"
+                                        class="text-slate-400 hover:text-red-400 transition-colors">
+                                        <i class="pi pi-trash text-sm"></i>
+                                    </button>
+                                </div>
+
+                                <div *ngIf="timeLogs.length === 0" class="text-center py-8 text-slate-500">
+                                    <i class="pi pi-clock text-3xl mb-2"></i>
+                                    <p>No time logged yet. Start a timer or add a manual entry.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comments -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="pi pi-comments text-slate-400"></i>
+                                <h3 class="font-semibold text-lg">Activity</h3>
+                            </div>
+
+                            <div class="flex gap-3 mb-6" [formGroup]="commentForm">
+                                <p-avatar [label]="currentUser?.displayName?.charAt(0)" shape="circle"
+                                    styleClass="bg-indigo-500 text-white"></p-avatar>
+                                <div class="flex-1">
+                                    <textarea pInputTextarea formControlName="content" placeholder="Write a comment..."
+                                        class="w-full bg-slate-800 border-slate-700 text-slate-200 p-2 rounded mb-2"
+                                        rows="2"></textarea>
+                                    <p-button label="Save" (onClick)="addComment()" [disabled]="commentForm.invalid"
+                                        styleClass="p-button-sm"></p-button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div *ngFor="let comment of task.comments" class="flex gap-3 group">
+                                    <p-avatar [label]="comment.userName.charAt(0)" shape="circle"
+                                        styleClass="bg-slate-600 text-white"></p-avatar>
+                                    <div class="flex-1">
+                                        <div class="flex items-baseline gap-2 mb-1">
+                                            <span class="font-semibold text-sm">{{ comment.userName }}</span>
+                                            <span class="text-xs text-slate-500">{{ comment.createdAt | date:'MMM d,
+                                                h:mm a'
+                                                }}</span>
+                                        </div>
+                                        <div class="bg-slate-800 p-3 rounded-lg text-sm text-slate-300 relative">
+                                            {{ comment.content }}
+                                            <button *ngIf="comment.userId === currentUser?.id"
+                                                (click)="deleteComment(comment.id)"
+                                                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-opacity">
+                                                <i class="pi pi-trash text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="w-64 bg-slate-800/30 p-4 space-y-6">
+            <!-- Actions -->
+            <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase mb-2">Actions</h4>
+                <div class="space-y-2">
+                    <button
+                        class="w-full text-left px-3 py-2 rounded hover:bg-slate-700 text-sm flex items-center gap-2 transition-colors"
+                        (click)="deleteTask()">
+                        <i class="pi pi-trash text-red-400"></i> Delete Task
+                    </button>
+                </div>
+            </div>
+
+            <!-- Properties -->
+            <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase mb-2">Properties</h4>
+
+                <!-- Status -->
+                <div class="mb-4">
+                    <label class="block text-xs text-slate-400 mb-1">Status</label>
+                    <p-dropdown [options]="columns" [(ngModel)]="task.columnId" optionLabel="name" optionValue="id"
+                        (onChange)="updateTaskField('columnId')"
+                        styleClass="w-full p-inputtext-sm bg-slate-800 border-slate-700"></p-dropdown>
+                </div>
+
+                <!-- Priority -->
+                <div class="mb-4">
+                    <label class="block text-xs text-slate-400 mb-1">Priority</label>
+                    <p-dropdown [options]="priorities" [(ngModel)]="task.priority" optionLabel="label"
+                        optionValue="value" (onChange)="updateTaskField('priority')"
+                        styleClass="w-full p-inputtext-sm bg-slate-800 border-slate-700">
+                        <ng-template pTemplate="selectedItem">
+                            <div class="flex items-center gap-2" *ngIf="task">
+                                <p-badge [value]="getPriorityLabel(task.priority)"
+                                    [severity]="getPriorityColor(task.priority)"></p-badge>
+                            </div>
+                        </ng-template>
+                        <ng-template let-priority pTemplate="item">
+                            <div class="flex items-center gap-2">
+                                <p-badge [value]="priority.label" [severity]="priority.color"></p-badge>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+
+                <!-- Due Date -->
+                <div class="mb-4">
+                    <label class="block text-xs text-slate-400 mb-1">Due Date</label>
+                    <p-calendar [formControl]="detailsForm.controls.dueDate" (onSelect)="updateTaskField('dueDate')"
+                        [showIcon]="true" dateFormat="yy-mm-dd" styleClass="w-full p-inputtext-sm"
+                        inputStyleClass="bg-slate-800 border-slate-700 text-white"></p-calendar>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div>
+                <h4 class="text-xs font-semibold text-slate-500 uppercase mb-2">Tags</h4>
+                <div class="flex flex-wrap gap-2 mb-2">
+                    <div *ngFor="let tag of task.tags"
+                        class="group flex items-center gap-1 px-2 py-1 rounded text-xs font-medium text-white"
+                        [style.background-color]="tag.color">
+                        {{ tag.name }}
+                        <button (click)="deleteTag(tag.id)"
+                            class="opacity-0 group-hover:opacity-100 hover:text-slate-200 transition-opacity">
+                            <i class="pi pi-times text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-1" [formGroup]="tagForm">
+                    <input pInputText formControlName="name" placeholder="New tag..."
+                        class="w-full bg-slate-800 border-slate-700 text-xs p-1 h-8" (keydown.enter)="addTag()">
+                    <button pButton icon="pi pi-plus" (click)="addTag()" [disabled]="tagForm.invalid"
+                        class="p-button-sm p-button-icon-only h-8 w-8"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</p-dialog>
+
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+<!-- Manual Time Entry Dialog -->
+<p-dialog header="Add Manual Time Entry" [(visible)]="showManualTimeDialog" [modal]="true" [style]="{width: '500px'}"
+    [draggable]="false" [resizable]="false">
+    <div class="space-y-4" [formGroup]="manualTimeForm">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Start Time *</label>
+                <p-calendar formControlName="startTime" [showTime]="true" [showIcon]="true" dateFormat="yy-mm-dd"
+                    hourFormat="24" class="w-full"></p-calendar>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">End Time *</label>
+                <p-calendar formControlName="endTime" [showTime]="true" [showIcon]="true" dateFormat="yy-mm-dd"
+                    hourFormat="24" class="w-full"></p-calendar>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+            <textarea pInputTextarea formControlName="description" class="w-full" rows="3"
+                placeholder="What did you work on?"></textarea>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" (onClick)="showManualTimeDialog = false"
+            styleClass="p-button-text"></p-button>
+        <p-button label="Add" icon="pi pi-check" (onClick)="addManualTime()" [disabled]="manualTimeForm.invalid"
+            styleClass="p-button-success"></p-button>
+    </ng-template>
+</p-dialog>

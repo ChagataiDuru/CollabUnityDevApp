@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: unity-hub-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - unity-hub-network
+
+  backend:
+    build:
+      context: ./backend/UnityDevHub.API
+      dockerfile: Dockerfile
+    container_name: unity-hub-backend
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=80
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=unitydevhub;Username=postgres;Password=${DB_PASSWORD}
+      - Jwt__Key=${JWT_SECRET}
+      - Jwt__Issuer=UnityDevHub
+      - Jwt__Audience=UnityDevHubClient
+      - GoogleSearch__ApiKey=${GOOGLE_API_KEY}
+      - GoogleSearch__EngineId=${GOOGLE_SEARCH_ENGINE_ID}
+      - FileStorage__Path=/app/uploads
+    volumes:
+      - upload-storage:/app/uploads
+    depends_on:
+      - postgres
+    networks:
+      - unity-hub-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: unity-hub-db
+    environment:
+      - POSTGRES_DB=unitydevhub
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - unity-hub-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: unity-hub-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/ssl:/etc/nginx/ssl:ro # Uncomment when SSL is ready
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - unity-hub-network
+
+networks:
+  unity-hub-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  upload-storage:

@@ -1,0 +1,107 @@
+<div class="h-full flex flex-col bg-slate-900 text-slate-100 p-6">
+    <p-toast></p-toast>
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <button pButton icon="pi pi-arrow-left" (click)="goToBoard()"
+                class="p-button-text p-button-sm mr-3"></button>
+            <span class="text-2xl font-bold">Team Settings</span>
+        </div>
+        <button pButton label="Add Member" icon="pi pi-user-plus" (click)="openAddMemberDialog()"
+            class="p-button-success"></button>
+    </div>
+
+    <div class="bg-slate-800 rounded-xl border border-slate-700 flex-1 overflow-hidden">
+        <p-table [value]="members" [loading]="loading" [scrollable]="true" scrollHeight="flex"
+            styleClass="p-datatable-sm" class="custom-table">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Member</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-member>
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                                {{ member.username.charAt(0).toUpperCase() }}
+                            </div>
+                            <div>
+                                <div class="font-medium">{{ member.displayName || member.username }}</div>
+                                <div class="text-sm text-slate-400">{{ member.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <p-dropdown *ngIf="canModifyRole(member)" [options]="roleOptions" [(ngModel)]="member.role"
+                            (onChange)="updateRole(member, member.role)" styleClass="w-36">
+                        </p-dropdown>
+                        <span *ngIf="!canModifyRole(member)" class="text-amber-400 font-semibold">
+                            {{ getRoleName(member.role) }}
+                        </span>
+                    </td>
+                    <td class="text-slate-400">{{ member.joinedAt | date:'short' }}</td>
+                    <td class="text-center">
+                        <button *ngIf="canModifyRole(member)" pButton icon="pi pi-trash" (click)="removeMember(member)"
+                            class="p-button-sm p-button-danger p-button-text"></button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="4" class="text-center text-slate-400 py-8">
+                        No team members found
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <p-dialog header="Add Team Member" [(visible)]="showAddMemberDialog" [modal]="true" [style.width]="'500px'">
+        <div class="flex flex-col gap-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Search User</label>
+                <span class="p-input-icon-left w-full">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" [(ngModel)]="searchQuery" (input)="onSearch($event)"
+                        placeholder="Search by username..." class="w-full" />
+                </span>
+            </div>
+
+            <div *ngIf="searchResults.length > 0" class="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                <div *ngFor="let user of searchResults"
+                    class="flex items-center justify-between p-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-bold">
+                            {{ user.username.charAt(0).toUpperCase() }}
+                        </div>
+                        <div>
+                            <div class="font-medium">{{ user.displayName || user.username }}</div>
+                            <div class="text-xs text-slate-400">{{ user.username }}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p-dropdown [options]="roleOptions" [(ngModel)]="selectedRole"
+                            styleClass="w-28 text-sm"></p-dropdown>
+                        <button pButton icon="pi pi-plus" (click)="addMember(user)"
+                            class="p-button-sm p-button-rounded p-button-success"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="searchQuery.length >= 3 && searchResults.length === 0 && !searching"
+                class="text-center text-slate-400 py-4">
+                No users found
+            </div>
+
+            <div *ngIf="searching" class="text-center text-slate-400 py-4">
+                <i class="pi pi-spin pi-spinner mr-2"></i> Searching...
+            </div>
+        </div>
+    </p-dialog>
+</div>

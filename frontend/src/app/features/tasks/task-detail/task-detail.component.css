@@ -1,0 +1,54 @@
+:host ::ng-deep .task-detail-dialog .p-dialog-header {
+    background-color: #0f172a;
+    border-bottom: 1px solid #334155;
+    color: #e2e8f0;
+    padding: 1rem;
+}
+
+:host ::ng-deep .task-detail-dialog .p-dialog-content {
+    padding: 0;
+    background-color: #0f172a;
+}
+
+:host ::ng-deep .p-editor-container .p-editor-toolbar {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+:host ::ng-deep .p-editor-container .p-editor-content {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+:host ::ng-deep .p-editor-container .ql-editor {
+    color: #e2e8f0;
+}
+
+:host ::ng-deep .p-calendar .p-inputtext {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+:host ::ng-deep .p-dropdown {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+:host ::ng-deep .p-dropdown .p-dropdown-label {
+    color: #e2e8f0;
+}
+
+:host ::ng-deep .p-dropdown-panel {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+:host ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+    color: #e2e8f0;
+}
+
+:host ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+    background-color: #334155;
+}
