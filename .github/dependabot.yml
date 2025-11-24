@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Maintain dependencies for frontend
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # Maintain dependencies for backend API
+  - package-ecosystem: "nuget"
+    directory: "/backend/UnityDevHub.API"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # Maintain dependencies for backend Tests
+  - package-ecosystem: "nuget"
+    directory: "/backend/UnityDevHub.API.Tests"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
