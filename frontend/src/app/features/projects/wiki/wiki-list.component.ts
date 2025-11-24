@@ -53,15 +53,16 @@ import { TooltipModule } from 'primeng/tooltip';
 })
 export class WikiListComponent {
   @Input() set pages(value: WikiPage[]) {
-    this.nodes = this.transformToTreeNodes(value);
+    this.files = this.transformToTreeNodes(value);
   }
   @Output() onSelect = new EventEmitter<WikiPage>();
   @Output() onCreate = new EventEmitter<WikiPage | null>(); // null for root
 
-  nodes: TreeNode[] = [];
+  files: TreeNode[] = [];
   selectedNode: TreeNode | null = null;
 
   transformToTreeNodes(pages: WikiPage[]): TreeNode[] {
+    if (!pages) return [];
     return pages.map(page => ({
       key: page.id,
       label: page.title,

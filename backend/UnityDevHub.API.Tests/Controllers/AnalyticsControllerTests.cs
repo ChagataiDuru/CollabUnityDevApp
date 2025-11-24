@@ -26,7 +26,7 @@ namespace UnityDevHub.API.Tests.Controllers
 
             _context = new ApplicationDbContext(options);
 
-            var user = new User { Id = Guid.NewGuid(), UserName = "testuser", FullName = "Test User" };
+            var user = new User { Id = Guid.NewGuid(), Username = "testuser", DisplayName = "Test User", PasswordHash="hash" };
             _testProject = new Project { Id = Guid.NewGuid(), Name = "Test Project", CreatedById = user.Id };
 
             _context.Users.Add(user);

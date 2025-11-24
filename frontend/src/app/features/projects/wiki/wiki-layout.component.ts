@@ -40,7 +40,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
         <p-confirmDialog></p-confirmDialog>
 
         <div *ngIf="loading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
-            <p-progress-spinner></p-progress-spinner>
+            <p-progressSpinner></p-progressSpinner>
         </div>
 
         <ng-container *ngIf="!loading">

@@ -29,7 +29,7 @@ namespace UnityDevHub.API.Tests.Controllers
             _context = new ApplicationDbContext(options);
 
             // Seed Data
-            _testUser = new User { Id = Guid.NewGuid(), UserName = "testuser", Email = "test@example.com", FullName = "Test User" };
+            _testUser = new User { Id = Guid.NewGuid(), Username = "testuser", DisplayName = "Test User", PasswordHash="hash" };
             _testProject = new Project { Id = Guid.NewGuid(), Name = "Test Project", CreatedById = _testUser.Id };
 
             _context.Users.Add(_testUser);
@@ -42,7 +42,7 @@ namespace UnityDevHub.API.Tests.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, _testUser.Id.ToString()),
-                new Claim(ClaimTypes.Name, _testUser.UserName)
+                new Claim(ClaimTypes.Name, _testUser.Username)
             };
             var identity = new ClaimsIdentity(claims, "TestAuth");
             var claimsPrincipal = new ClaimsPrincipal(identity);
