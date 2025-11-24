@@ -169,7 +169,7 @@ namespace UnityDevHub.API.Controllers
                 CreatedAt = page.CreatedAt,
                 UpdatedAt = page.UpdatedAt,
                 LastEditorId = page.LastEditorId,
-                LastEditorName = page.LastEditor?.FullName ?? "Unknown" // Assuming User has FullName or similar
+                LastEditorName = page.LastEditor?.DisplayName ?? "Unknown"
             };
 
             if (allPages != null)

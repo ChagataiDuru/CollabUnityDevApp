@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using UnityDevHub.API.Services;
 using UnityDevHub.API.Controllers;
 using UnityDevHub.API.Data;
 using UnityDevHub.API.Data.Entities;
@@ -23,6 +24,7 @@ namespace UnityDevHub.API.Tests.Controllers
         private readonly Mock<IHubContext<ProjectHub>> _mockHub;
         private readonly Mock<IClientProxy> _mockClientProxy;
         private readonly Mock<IHubClients> _mockHubClients;
+        private readonly Mock<INotificationService> _mockNotificationService;
         private readonly TasksController _controller;
         private readonly Guid _userId;
 
@@ -37,12 +39,13 @@ namespace UnityDevHub.API.Tests.Controllers
             _mockHub = new Mock<IHubContext<ProjectHub>>();
             _mockHubClients = new Mock<IHubClients>();
             _mockClientProxy = new Mock<IClientProxy>();
+            _mockNotificationService = new Mock<INotificationService>();
 
             _mockHub.Setup(h => h.Clients).Returns(_mockHubClients.Object);
             _mockHubClients.Setup(c => c.Group(It.IsAny<string>())).Returns(_mockClientProxy.Object);
             _mockHubClients.Setup(c => c.User(It.IsAny<string>())).Returns(_mockClientProxy.Object);
 
-            _controller = new TasksController(_context, _mockHub.Object);
+            _controller = new TasksController(_context, _mockHub.Object, _mockNotificationService.Object);
 
             _userId = Guid.NewGuid();
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
